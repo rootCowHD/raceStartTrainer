@@ -13,6 +13,12 @@ For now (V0.7) the Script is static and in active development:
 <h2>How to use it</h2>
 - Download RS_COW.lua and put it on your Radio under: SCRIPTS/TELEMETRY<br>
 - Copy the RACESTART Structure in your SCRIPTS Folder (This Structure will be used in later Versions)<br>
+- Add RS_COW.lua to a Telemetry Screen<br>
+- While on the Script Page use up and down to change the delay before the Timer <br>
+- Left and Right change the actual within Timer<br>
+- Press enter to enable the actual Script (shown in the bottom Left Corner)<br>
+- The Bottom Right Corner shows an activation by switch (not yet implemented)<br>
+- When enabled (Display shows Enter: Disable) the Timer should start by arming (only when Betaflight Telemetry is running)
 
 <h2>What's to do before V1</h2>
 - Make an "start by switch" option (to get rid of forced Telemetry), V0.8<br>
