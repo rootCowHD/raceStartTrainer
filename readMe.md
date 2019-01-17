@@ -3,29 +3,16 @@
 The Idea behind this Timer is simpel, getting used to a "with in" race start timer. 
 This time can be different from Race to Race, so the Start in the Script must be variable, too.
 
-<h2>Dependencies</h2>
-For now (V0.7) the Script is static and in active development:
-- Telemetry Screen is optimized for the Taranis xLite (openTX 2.2.2) but should also work with any other FrSky Radio<br>
-- Control works via Betaflight Telemetry only<br>
-- Control works via FrSky (SmarPort / F.Port) only<br>
-- Voices need to be set up for number Readings
+<h2> Now at 0.9 </h2>
+We can start the Timer without Telemetry.
+The Telemetry Screen is still needed to activate the Script
+<h2> !WARNING!</h2>
+For Now it only works on the xlite
 
-<h2>How to use it</h2>
-- Download RS_COW.lua and put it on your Radio under: SCRIPTS/TELEMETRY<br>
-- Copy the RACESTART Structure in your SCRIPTS Folder (This Structure will be used in later Versions)<br>
-- Add RS_COW.lua to a Telemetry Screen<br>
-- While on the Script Page use up and down to change the delay before the Timer <br>
-- Left and Right change the actual within Timer<br>
-- Press enter to enable the actual Script (shown in the bottom Left Corner)<br>
-- The Bottom Right Corner shows an activation by switch (not yet implemented)<br>
-- When enabled (Display shows Enter: Disable) the Timer should start by arming (only when Betaflight Telemetry is running)
-
-<h2>What's to do before V1</h2>
-- Make an "start by switch" option (to get rid of forced Telemetry), V0.8<br>
-- Optimize the Screen for other Radios, V0.9<br>
-- Split into multiple Files for a better overview and less Memory use V1.0<br>
-- Implement FallBack Audio Files<br>
-- Optimize Visuals<br>
+<h2>How to use it:</h2>
+Merge the Scripts Folder with the one on your Taranis. You can now add RS_COW to one of your Telemetry Screens.<br>
+<b>If you have Betaflight Telemetry:</b> go to the Telemetry Screen, change the Time before the countdown and the countdown itself, press the stick once (The bottom Left Text will not longer be inverted) and done. By arming you will now start your countdown. To Disable the Script, just go to your Telemetry Screen again, press the stick again and you won't get any voicelines (nor will the Script use as much working Power)<br><br>
+<b>Without Betaflight Telemetry:</b> you need to map the function Scripts RS_HLD and RS_RUN to a switch (best way is to use the arm switch) on arm add the RS_RUN Script on disarm add RS_HLD. For this go to your Model Settings and to the Special Function Screen. When done, you can use the script like you have Arming Control (just without that your RC don't need to be actually armed)
 
 <h2>Sources and Rights</h2>
 - OpenTX: https://www.open-tx.org/ <br>
