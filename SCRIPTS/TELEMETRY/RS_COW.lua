@@ -1,151 +1,193 @@
 -- Author: Stefan Werntges (@RootCowHD)
 -- Target: openTX 2.2
--- Global Functions: no
--- Global Variables: no
 -- Version: 1.0.0
+-- Uses global Variables
 
--- Used Variables:
-local isRunning = false -- determs the running state of the script
-local started = false -- checks if the machine was armed
-local delayed = false -- determs that the delay is done
-local gone = false -- used to confirm the Start
-local armSwitch = false -- determs if the timer should start
+-- used global Variables
+-- Functions Variables
+rootCowHD_RACESTART_override = false
+rootCowHD_RACESTART_startSwitch = false
+rootCowHD_RACESTART_runDone = false
+rootCowHD_RACESTART_hldDone = false
+rootCowHD_RACESTART_setWithin = 5
+rootCowHD_RACESTART_setDelay = 4
+rootCowHD_RACESTART_isRunning = false -- Determins if the Script actually is running
 
-local countdown = 0 -- the countdown Time (1 = 10ms)
-local delayTime = 0 -- the delay Time (1 = 10ms)
+-- used local variables
+-- General Variables
+local isReady = false 	-- Toggle when armed or on Switch
+                        -- When Override then it is startSwitch
+                        -- Else it is calculated by the Arm Bit
+                        -- The Arm Bit needs Smart Port or F.Port Telemetry
+local isStarted = false -- Toggle when Ready but not started
+                        -- Activates the Time calculation
+                        -- Voice Out "Countdown in"
+local isDelayed = false -- Toggle when delay Coundown is over
+                        -- Voice Out "Start within"
+local isGone = false    -- Toggle when Timer is over
+                        -- voice Out "Go"
+                        -- When isReady is toggled to false
+                        -- Voice Out "Cancelled" and reset
+                        -- isStarted and isDelayed unless isGone is true
+-- Telemetry Variables
+local maxTimer = 20
+local minTimer = 2
+local maxDelay = 15
+local minDelay = 0
 
-local startWithIn = 5 -- between delay and this is the actual Time
-local startDelay = 4 -- delay before timer starts
+-- random timer
+local countdown = 0
+local delayTime = 0
 
-local maxTimer = 20 -- maximum timer
-local maxDelay = 15 -- maximum delay
-local minTimer = 2 -- minimum timer
-local minDelay = 0 -- minimum delay
+-- transmitter infos
+local ver, radio, maj, minor, rev, view
 
--- Init Function
-local function init_func()
-end
-
--- Background Function
-local function bg_func()
-  if(isRunning) then
-    local v_Tmp1 = getValue('Tmp1')
-    local v_Arm = v_Tmp1 % 10
-    if( v_Arm > 3) then
-      armSwitch = true
-    else
-      armSwitch = false
-    end
-
-    -- TimeOut to start delay
-    if(armSwitch and not started and not gone and not delayed) then
-      started = true
-
-      if(startDelay > 3) then
-        playFile("/SCRIPTS/RACESTART/SOUNDS/COUNTI.wav")
-        playNumber(startDelay,0,0) -- 0 for no Unit
-      end
-
-      math.randomseed(getTime())
-      local startTime = getTime()
-      delayTime = startTime + (100 * startDelay)
-      countdown = delayTime + math.random(200,((startWithIn * 100)+200))
-    end
-
-    -- TimeOut to start Within Timer
-    if (armSwitch and started and not gone and not delayed) then
-      if(getTime() > delayTime) then
-        delayed = true
-        playFile("/SCRIPTS/RACESTART/SOUNDS/WITHIN.wav")
-        playNumber(startWithIn,0,0) -- 26 for longer Text
-      end
-    end
-
-    -- TimeOut for GO
-    if(armSwitch and started and not gone and delayed) then
-      if( getTime() > countdown) then
-        gone = true
-        playFile("/SCRIPTS/RACESTART/SOUNDS/GO.wav")
-      end
-    end
-
-    -- Cancel Switch
-    if(not armSwitch) then
-      if(delayed and not gone or started and not gone) then
-        playFile("/SCRIPTS/RACESTART/SOUNDS/CANCEL.wav")
-      end
-      started = false
-      gone = false
-      delayed = false
-    end
-  end
-end
-
--- Run Function
-local function run_func(event)
-  -- Start the System in Telemetry Screen
-  if(event == EVT_ENTER_BREAK) then
-    isRunning = not isRunning
-  end
-
-  if (event == 37 or event == 69) then
-    if(startWithIn < maxTimer) then
-      startWithIn = startWithIn + 1
-    end
-  end
-
-  if (event == 38 or event == 70) then
-    if(startWithIn > minTimer) then
-      startWithIn = startWithIn - 1
-      if ((startDelay + minTimer)  > startWithIn) then
-        startDelay = startDelay - 1
-      end
-    end
-  end
-
-  if (event == 35 or event == 67) then
-    if (startDelay > minDelay) then
-      startDelay = startDelay - 1
-    end
-  end
-
-  if (event == 36 or event == 68) then
-    if (startDelay < (startWithIn - minTimer)) then
-      startDelay = startDelay + 1
-    end
-  end
-
-  -- Screen for Taranis xLite
-  lcd.clear()
-  lcd.drawScreenTitle("Race Start Trainer", 1, 1)
-  lcd.drawText(1,11,"Start Time")
-  lcd.drawText(1,11,"Timer Delay")
-  lcd.drawText(70,11,"Max. Timer")
-  lcd.drawLine(1,22,128,22,SOLID,FORCE)
-  lcd.drawText(21,28,startDelay,DBLSIZE)
-  lcd.drawText(86,28,startWithIn,DBLSIZE)
-  lcd.drawLine(1,48,128,48,SOLID,FORCE)
-  lcd.drawLine(64,11,64,64,SOLID,FORCE)
-  lcd.drawText(1,54,"Enter:",SMLSIZE)
-
-  if(isRunning) then
-    lcd.drawText(31,54,"Disable", SMLSIZE)
+-- check if the system is Ready
+-- switch or Arm Bit
+local function checkReady()
+  if (rootCowHD_RACESTART_override) then isReady = rootCowHD_RACESTART_startSwitch
   else
-    lcd.drawText(31,54,"Enable",INVERS + SMLSIZE)
+    local v_Arm = getValue('Tmp1') % 10
+    if(v_Arm > 3) then isReady = true
+    else isReady = false end
   end
-
-  lcd.drawText(70,54,"nonGlobal",INVERS + SMLSIZE)
-
-  lcd.drawLine(54,25,49,32,SOLID,FORCE)
-  lcd.drawLine(54,25,59,32,SOLID,FORCE)
-  lcd.drawLine(54,45,49,38,SOLID,FORCE)
-  lcd.drawLine(54,45,59,38,SOLID,FORCE)
-
-  lcd.drawLine(108,35,115,30,SOLID,FORCE)
-  lcd.drawLine(108,35,115,40,SOLID,FORCE)
-  lcd.drawLine(125,35,118,30,SOLID,FORCE)
-  lcd.drawLine(125,35,118,40,SOLID,FORCE)
+  return isReady
 end
 
--- Export Functions
+-- Set randomValue and isStarted
+local function calcRandom()
+  if(isReady and not isStarted and not isDelayed and not isGone) then
+    isStarted = true
+    local startTime = getTime()
+    math.randomseed(startTime)
+
+    if(rootCowHD_RACESTART_setDelay > 3) then
+      playFile("/SCRIPTS/RACESTART/SOUNDS/COUNTI.wav")
+      playNumber(rootCowHD_RACESTART_setDelay,0,0) -- 0 for no Unit
+    end
+
+    delayTime = startTime + (100 * rootCowHD_RACESTART_setDelay)
+    countdown = delayTime + math.random(200,((rootCowHD_RACESTART_setWithin * 100) + 200))
+    return false
+  end
+  return true
+end
+
+-- check for Delay countdown
+local function checkDelay()
+  if(isReady and isStarted and not isDelayed and not isGone) then
+    if(getTime() > delayTime) then
+      isDelayed = true
+      playFile("/SCRIPTS/RACESTART/SOUNDS/WITHIN.wav")
+      playNumber(rootCowHD_RACESTART_setWithin,0,0) -- 26 for longer Text
+    end
+    return false
+  end
+  return true
+end
+
+-- check for start Countdown
+local function checkCountdown()
+  if(isReady and isStarted and isDelayed and not isGone) then
+    if(getTime() > countdown) then
+      isGone = true
+      playFile("/SCRIPTS/RACESTART/SOUNDS/GO.wav")
+    end
+    return false
+  end
+  return true
+end
+
+-- check if isReady
+local function checkCancelled()
+  if( not isReady ) then
+    if (isStarted and not isGone or isDelayed and not isGone) then
+      playFile("/SCRIPTS/RACESTART/SOUNDS/CANCEL.wav")
+    end
+    isStarted = false
+    isDelayed = false
+    isGone = false
+    return true
+  end
+  return false
+end
+
+local function subCountdown()
+  if(rootCowHD_RACESTART_setWithin > minTimer) then
+    rootCowHD_RACESTART_setWithin = rootCowHD_RACESTART_setWithin - 1
+  end
+end
+
+local function addCountdown()
+  if(rootCowHD_RACESTART_setWithin < maxTimer) then
+    rootCowHD_RACESTART_setWithin = rootCowHD_RACESTART_setWithin + 1
+  end
+end
+
+local function subDelay()
+  if (rootCowHD_RACESTART_setDelay > minDelay) then
+    rootCowHD_RACESTART_setDelay = rootCowHD_RACESTART_setDelay - 1
+  end
+end
+
+local function addDelay()
+  if (rootCowHD_RACESTART_setDelay < maxDelay) then
+    rootCowHD_RACESTART_setDelay = rootCowHD_RACESTART_setDelay + 1
+  end
+end
+
+local function toggleRunning()
+  rootCowHD_RACESTART_isRunning = not rootCowHD_RACESTART_isRunning
+  return rootCowHD_RACESTART_isRunning
+end
+
+local function selectTransmitter(rad)
+  local err
+  view, err = loadScript("/SCRIPTS/RACESTART/TRANSMITTERS/"..rad..".lua")
+  if(view ~= nil) then
+  else
+    print(err)
+  end
+end
+
+local function init_func()
+  ver, radio, maj, minor, rev = getVersion()
+  if(radio == "xlite" or radio == "xlite_simu") then
+    selectTransmitter("xlite")
+  end
+--   select system
+-- change layout and controls per System
+end
+
+local function bg_func()
+  if(rootCowHD_RACESTART_isRunning) then
+    checkReady()
+    calcRandom()
+    checkDelay()
+    checkCountdown()
+    checkCancelled()
+  end
+end
+
+local function run_func(event)
+  if(RootCowHD_Control_xlite) then
+    if(event == EVT_ENTER_BREAK) then
+      toggleRunning()
+    end
+    if (event == 37 or event == 69) then
+      addCountdown()
+    end
+    if (event == 38 or event == 70) then
+      subCountdown()
+    end
+    if (event == 35 or event == 67) then
+      subDelay()
+    end
+    if (event == 36 or event == 68) then
+      addDelay()
+    end
+  end
+  view()
+end
+
 return { run=run_func, background=bg_func, init=init_func }
