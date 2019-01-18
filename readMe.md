@@ -3,11 +3,11 @@
 The Idea behind this Timer is simpel, getting used to a "with in" race start timer. 
 This time can be different from Race to Race, so the Start in the Script must be variable, too.
 
-<h2> Now at 0.9 </h2>
-We can start the Timer without Telemetry.
-The Telemetry Screen is still needed to activate the Script
-<h2> !WARNING!</h2>
-For Now it only works on the xlite
+<h2> Now at 0.9.5 </h2>
+The Script works technically correct.
+The inner layout needs to be fixed to save some calculation power
+X9 Layout is just temporarly
+all Layouts will get a make over when the technically part is done
 
 <h2>How to use it:</h2>
 Merge the Scripts Folder with the one on your Taranis. You can now add RS_COW to one of your Telemetry Screens.<br>
