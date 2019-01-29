@@ -1,3 +1,21 @@
+local event = RootCowHD_Global_event
+
+if(event == EVT_ENTER_BREAK) then
+  toggleRunning()
+end
+if (event == 37 or event == 69) then
+  addCountdown()
+end
+if (event == 38 or event == 70) then
+  subCountdown()
+end
+if (event == 35 or event == 67) then
+  subDelay()
+end
+if (event == 36 or event == 68) then
+  addDelay()
+end
+
 lcd.clear()
 lcd.drawScreenTitle("Race Start Trainer", 1, 1)
 lcd.drawText(1,11,"Start Time")

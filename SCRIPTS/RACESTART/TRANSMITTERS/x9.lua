@@ -1,3 +1,37 @@
+local event = RootCowHD_Global_event
+
+if(event == EVT_MINUS_BREAK or event == EVT_MINUS_REPT) then
+  if(rootCowHD_RACESTART_eleLock == false) then
+    if(rootCowHD_RACESTART_selected == 0) then
+      rootCowHD_RACESTART_selected = 1
+    else
+      rootCowHD_RACESTART_selected = rootCowHD_RACESTART_selected -1
+    end
+  else
+    if(rootCowHD_RACESTART_selected == 0) then subDelay() end
+    if(rootCowHD_RACESTART_selected == 1) then subCountdown() end
+  end
+end
+
+if(event == EVT_PLUS_BREAK or event == EVT_PLUS_REPT) then
+  if(rootCowHD_RACESTART_eleLock == false) then
+    if(rootCowHD_RACESTART_selected == 1) then
+      rootCowHD_RACESTART_selected = 0
+    else
+      rootCowHD_RACESTART_selected = rootCowHD_RACESTART_selected +1
+    end
+  else
+    if(rootCowHD_RACESTART_selected == 0) then addDelay() end
+    if(rootCowHD_RACESTART_selected == 1) then addCountdown() end
+  end
+end
+
+if(event == EVT_ENTER_BREAK) then
+  rootCowHD_RACESTART_eleLock = not rootCowHD_RACESTART_eleLock
+end
+
+if(event == EVT_MENU_BREAK) then toggleRunning() end
+
 lcd.clear()
 lcd.drawScreenTitle("Race Start Trainer", 1, 1)
 lcd.drawText(1,11,"Start Time")
