@@ -14,7 +14,7 @@ rootCowHD_RACESTART_setDelay = 4
 rootCowHD_RACESTART_isRunning = false -- Determins if the Script actually is running
 rootCowHD_RACESTART_selected = 0
 rootCowHD_RACESTART_eleLock = false
-
+RootCowHD_Global_event = 0
 -- used local variables
 -- General Variables
 local isReady = false 	-- Toggle when armed or on Switch
@@ -155,19 +155,16 @@ end
 local function init_func()
   ver, radio, maj, minor, rev = getVersion()
   if(radio == "xlite" or radio == "xlite_simu") then
-    RootCowHD_Control_SCHEME = "xLite"
     selectTransmitter("xLite")
   end
 
   if(radio == "x7" or radio == "x7_simu") then
-    RootCowHD_Control_SCHEME = "X7"
     selectTransmitter("x7")
   end
 
   if( radio == "x9d" or radio == "x9d_simu" or
       radio == "x9d+" or radio == "x9d+_simu" or
       radio == "x9e" or radio == "x9e_simu") then
-    RootCowHD_Control_SCHEME = "X9"
     selectTransmitter("x9")
   end
 end
@@ -183,92 +180,7 @@ local function bg_func()
 end
 
 local function run_func(event)
-  if(RootCowHD_Control_SCHEME == "xLite") then
-    if(event == EVT_ENTER_BREAK) then
-      toggleRunning()
-    end
-    if (event == 37 or event == 69) then
-      addCountdown()
-    end
-    if (event == 38 or event == 70) then
-      subCountdown()
-    end
-    if (event == 35 or event == 67) then
-      subDelay()
-    end
-    if (event == 36 or event == 68) then
-      addDelay()
-    end
-  end
-
-  if(RootCowHD_Control_SCHEME == "X7") then
-    if(event == EVT_ROT_LEFT) then
-      if(rootCowHD_RACESTART_eleLock == false) then
-        if(rootCowHD_RACESTART_selected == 0) then
-          rootCowHD_RACESTART_selected = 1
-        else
-          rootCowHD_RACESTART_selected = rootCowHD_RACESTART_selected -1
-        end
-      else
-        if(rootCowHD_RACESTART_selected == 0) then subDelay() end
-        if(rootCowHD_RACESTART_selected == 1) then subCountdown() end
-      end
-    end
-
-    if(event == EVT_ROT_RIGHT) then
-      if(rootCowHD_RACESTART_eleLock == false) then
-        if(rootCowHD_RACESTART_selected == 1) then
-          rootCowHD_RACESTART_selected = 0
-        else
-          rootCowHD_RACESTART_selected = rootCowHD_RACESTART_selected +1
-        end
-      else
-        if(rootCowHD_RACESTART_selected == 0) then addDelay() end
-        if(rootCowHD_RACESTART_selected == 1) then addCountdown() end
-      end
-    end
-
-    if(event == EVT_ENTER_BREAK) then
-      rootCowHD_RACESTART_eleLock = not rootCowHD_RACESTART_eleLock
-    end
-
-    if(event == EVT_MENU_BREAK) then toggleRunning() end
-  end
-
-  if(RootCowHD_Control_SCHEME == "X9") then
-    if(event == EVT_MINUS_BREAK or event == EVT_MINUS_REPT) then
-      if(rootCowHD_RACESTART_eleLock == false) then
-        if(rootCowHD_RACESTART_selected == 0) then
-          rootCowHD_RACESTART_selected = 1
-        else
-          rootCowHD_RACESTART_selected = rootCowHD_RACESTART_selected -1
-        end
-      else
-        if(rootCowHD_RACESTART_selected == 0) then subDelay() end
-        if(rootCowHD_RACESTART_selected == 1) then subCountdown() end
-      end
-    end
-
-    if(event == EVT_PLUS_BREAK or event == EVT_PLUS_REPT) then
-      if(rootCowHD_RACESTART_eleLock == false) then
-        if(rootCowHD_RACESTART_selected == 1) then
-          rootCowHD_RACESTART_selected = 0
-        else
-          rootCowHD_RACESTART_selected = rootCowHD_RACESTART_selected +1
-        end
-      else
-        if(rootCowHD_RACESTART_selected == 0) then addDelay() end
-        if(rootCowHD_RACESTART_selected == 1) then addCountdown() end
-      end
-    end
-
-    if(event == EVT_ENTER_BREAK) then
-      rootCowHD_RACESTART_eleLock = not rootCowHD_RACESTART_eleLock
-    end
-
-    if(event == EVT_MENU_BREAK) then toggleRunning() end
-  end
-
+  RootCowHD_Global_event = event
   view()
 end
 
